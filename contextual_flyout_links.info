@@ -3,5 +3,4 @@ description = Changes the Drupal core contextual links into a stylized flyout me
 core = 7.x
 files[] = contextual_flyout_links.module
 files[] = contextual_flyout_links.install
-files[] = contextual_flyout_links.test
 dependencies[] = contextual
