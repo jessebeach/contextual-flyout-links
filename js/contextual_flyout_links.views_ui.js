@@ -107,4 +107,4 @@
     }
     return false;
   };
-})(jQuery);
+}(jQuery));

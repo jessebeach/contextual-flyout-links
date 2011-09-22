@@ -21,33 +21,50 @@
 
 
   Drupal.behaviors.contextualFlyoutLinks = {
-    attach: function (context) {
+    attach: function (context, settings) {
       // Set up contextual links for logged in users, but not when the themebuilder is open
       if ($('body').hasClass('logged-in') && !$('body').hasClass('themebuilder')) {
         // Create the proxy links overlay
         // This will contain the contextual links and be placed over the
         // active contextual links region
-        var $proxy = $('<div class="contextual-links-region-proxy" style="display:none;"></div>')
-          .prependTo('body')
-          .bind('mouseleave.contextualFlyoutLinks',
-        {
-          'functions': [
+        var $proxy = $('<div>', {
+          style: "display:none"
+        })
+        .once('contextual-links-region-proxy', function (context, settings) {
+          $(this).bind('mouseleave.contextualFlyoutLinks',
             {
-              'action': Drupal.contextualFlyoutLinks.deactivateProxy,
-              'delay': 300
-            }
-          ]
-        }, Drupal.contextualFlyoutLinks.createDelay);
-        var $boxTop = $('<div>').addClass('contextual-links-region-proxy-outline outline-top').insertAfter($proxy);
-        var $boxRight = $('<div>').addClass('contextual-links-region-proxy-outline outline-right').insertAfter($boxTop);
-        var $boxBottom = $('<div>').addClass('contextual-links-region-proxy-outline outline-bottom').insertAfter($boxRight);
-        $('<div>').addClass('contextual-links-region-proxy-outline outline-left').insertAfter($boxBottom);
+              'functions': [
+                {
+                  'action': Drupal.contextualFlyoutLinks.deactivateProxy,
+                  'delay': 300
+                }
+              ]
+            }, Drupal.contextualFlyoutLinks.createDelay)  
+          .addClass('contextual-links-region-proxy')
+          .prependTo('body');
+        });
+        // Set up the outlines that surround the hovered page element.
+        var $box = $('<div>').once('contextual-links-region-proxy-outline-top', function (context, settings) {
+          $(this).addClass('contextual-links-region-proxy-outline outline-top').insertAfter($proxy);
+        });
+        $box = $('<div>').once('contextual-links-region-proxy-outline-right', function (context, settings) {
+          $(this).addClass('contextual-links-region-proxy-outline outline-right').insertAfter($box);
+        });
+        $box = $('<div>').once('contextual-links-region-proxy-outline-bottom', function (context, settings) {
+          $(this).addClass('contextual-links-region-proxy-outline outline-bottom').insertAfter($box);
+        });
+        $('<div>').once('contextual-links-region-proxy-outline-left', function (context, settings) {
+          $(this).addClass('contextual-links-region-proxy-outline outline-left').insertAfter($box);
+        });
 
         // Process each instance of a contextual link set
         $('div.contextual-links-wrapper', context).once('contextual-flyout-links', function () {
-          var $wrapper = $(this),
-              $region = $wrapper.closest('div.contextual-links-region'),
-              $trigger = $('<a class="contextual-links-trigger" href="#" />').text(Drupal.t('Configure'));
+          var $wrapper = $(this);
+          var $region = $wrapper.closest('div.contextual-links-region');
+          var $trigger = $('<a>', {
+            href: '#',
+            text: Drupal.t('Configure')
+          }).addClass('contextual-links-trigger');
           $wrapper.prepend($trigger);
           Drupal.contextualFlyoutLinks.establishBindings($region, $wrapper);
           // Hide the core contextual links. We keep them in the DOM for accessibility.
@@ -109,14 +126,18 @@
     $trigger.bind('mouseenter.contextualFlyoutLinks',
       {
         'functions': [
-          { 'action': Drupal.contextualFlyoutLinks.showLinks, 'delay': 150 }
+          { 'action': Drupal.contextualFlyoutLinks.showLinks,
+            'delay': 150
+          }
         ]
       }, Drupal.contextualFlyoutLinks.createDelay);
     // Hide the links when the user mouses out
     $links.bind('mouseleave.contextualFlyoutLinks',
       {
         'functions': [
-          { 'action': Drupal.contextualFlyoutLinks.hideLinks, 'delay': 50 }
+          { 'action': Drupal.contextualFlyoutLinks.hideLinks,
+            'delay': 50
+          }
         ]
       }, Drupal.contextualFlyoutLinks.createDelay);
 
@@ -277,4 +298,4 @@
       event.data.element.parent().addClass('edge-collision');
     }
   };
-})(jQuery);
+}(jQuery));
